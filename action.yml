@@ -1,5 +1,5 @@
 name: 'codeql-dependency-graph-action'
-description: 'Advance Security Policy as Code'
+description: 'CodeQL Dependency Graph Action'
 
 inputs:
   repository:
