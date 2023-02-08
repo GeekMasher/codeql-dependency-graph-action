@@ -72,4 +72,4 @@ predicate encodedDependencies(File source, string encodedDependency) {
 
 from File file, string encodedDependency
 where encodedDependencies(file, encodedDependency)
-select encodedDependency, file
+select encodedDependency
