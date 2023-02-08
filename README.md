@@ -1,6 +1,7 @@
 # codeql-dependency-graph-action
 
-CodeQL Dependency Graph Action
+CodeQL Dependency Graph Action is focused on capturing as much information from CodeQL databases and build out a bill of materials that was discovered during analysis.
+This is them uploaded as a snapshot to the Dependency Graph to discover if the versions of software contain any security issues.
 
 ## Usage
 
