@@ -48,7 +48,16 @@ class Dependency:
         return self.name
 
     def getPurl(self):
-        return f"pkg:{self.manager}/{self.namespace}/{self.name}@{self.version}"
+        result = f"pkg:"
+        if self.manager:
+            result += f"{self.manager}/"
+        if self.namespace:
+            result += f"{self.namespace}/"
+        result += f"{self.name}"
+        if self.version:
+            result += f"@{self.version}"
+            
+        return result
 
     def __str__(self) -> str:
         """Return a string representation of the dependency"""
