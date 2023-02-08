@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 
 from codeqldepgraph import __name__, __version__, __url__
+from codeqldepgraph.codeql import CodeQL
 
 logger = logging.getLogger(__name__)
 
@@ -78,12 +79,15 @@ def parseDependencies(data: str) -> list[Dependency]:
     return results
 
 
-def exportDependencies(dependencies: list[Dependency], **kwargs):
+def exportDependencies(codeql: CodeQL, dependencies: list[Dependency], **kwargs) -> dict:
+    """ Create a dependency graph submission JSON payload for GitHub
+    """
     resolved = {}
     for dep in dependencies:
         name = dep.getName()
         purl = dep.getPurl()
         resolved[name] = {"package_url": purl}
+
     data = {
         "version": 0,
         "sha": kwargs.get("sha"),
@@ -95,7 +99,7 @@ def exportDependencies(dependencies: list[Dependency], **kwargs):
             __name__: {
                 "name": __name__,
                 "file": {
-                    "source_location": "codeql",
+                    "source_location": f"codeql-{codeql.language}",
                 },
                 "resolved": resolved,
             }

@@ -89,6 +89,7 @@ if __name__ == "__main__":
                 print(dep)
 
         depgraph = exportDependencies(
+            codeql,
             results,
             # git sha and ref
             sha=args.sha,
