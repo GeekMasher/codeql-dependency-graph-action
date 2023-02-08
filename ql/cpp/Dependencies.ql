@@ -12,7 +12,6 @@
 import cpp
 import semmle.code.cpp.commons.Dependency
 
-
 /**
  * An `Element` that is to be considered a Library.
  */
@@ -114,4 +113,4 @@ predicate encodedDependencies(File source, string encodedDependency, int num) {
 
 from File file, int num, string encodedDependency
 where encodedDependencies(file, encodedDependency, num)
-select encodedDependency, num order by num desc
+select encodedDependency
