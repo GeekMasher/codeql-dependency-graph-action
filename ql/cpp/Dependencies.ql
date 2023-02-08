@@ -1,20 +1,9 @@
-/**
- * @deprecated
- * @name External dependencies
- * @description Count the number of dependencies a C/C++ source file has on external libraries.
- * @kind treemap
- * @treemap.warnOn highValues
- * @metricType externalDependency
- * @id cpp/external-dependencies
- * @tags modularity
- */
-
+// https://github.com/github/codeql/tree/main/cpp/ql/src/Metrics/Dependencies
 import cpp
+// https://github.com/github/codeql/blob/main/cpp/ql/lib/semmle/code/cpp/commons/Dependency.qll
 import semmle.code.cpp.commons.Dependency
 
-/**
- * An `Element` that is to be considered a Library.
- */
+// https://github.com/github/codeql/blob/main/cpp/ql/lib/semmlecode.cpp.dbscheme#L143-L156
 abstract class LibraryElement extends Element {
   abstract string getName();
 
@@ -52,13 +41,7 @@ class Library extends LibraryT {
 
   string getName() { result = name }
 
-  string getVersion() {
-    // The versions reported for C/C++ dependencies are just the versions that
-    // happen to be installed on the system where the build takes place.
-    // Reporting those versions is likely to cause misunderstandings, both for
-    // people reading them and for vulnerability checkers.
-    result = "unknown"
-  }
+  string getVersion() { result = "unknown" }
 
   string toString() { result = getName() + "-" + getVersion() }
 
@@ -76,41 +59,17 @@ class Library extends LibraryT {
 }
 
 /**
- * Holds if there are `num` dependencies from `sourceFile` on `destLib` (and
- * `sourceFile` is not in `destLib`).
- */
-predicate libDependencies(File sourceFile, Library destLib, int num) {
-  num =
-    strictcount(Element source, Element dest, File destFile |
-      // dependency from source -> dest.
-      dependsOnSimple(source, dest) and
-      sourceFile = source.getFile() and
-      destFile = dest.getFile() and
-      // destFile is inside destLib, sourceFile is outside.
-      destFile = destLib.getAFile() and
-      not sourceFile = destLib.getAFile() and
-      // don't include dependencies from template instantiations that
-      // may depend back on types in the using code.
-      not source.isFromTemplateInstantiation(_) and
-      // exclude very common dependencies
-      not destLib.getName() = "linux" and
-      not destLib.getName().regexpMatch("gcc-[0-9]+") and
-      not destLib.getName() = "glibc"
-    )
-}
-
-/**
  * Generate the table of dependencies for the query (with some
  * packages that basically all projects depend on excluded).
  */
-predicate encodedDependencies(File source, string encodedDependency, int num) {
+predicate encodedDependencies(File source, string encodedDependency) {
   exists(Library destLib |
-    libDependencies(source, destLib, num) and
+    source = destLib.getAFile() and
     encodedDependency =
-      "/" + source.getRelativePath() + "<|>" + destLib.getName() + "<|>" + destLib.getVersion()
+      "/" + source.getAbsolutePath() + "<|>" + destLib.getName() + "<|>" + destLib.getVersion()
   )
 }
 
-from File file, int num, string encodedDependency
-where encodedDependencies(file, encodedDependency, num)
-select encodedDependency
+from File file, string encodedDependency
+where encodedDependencies(file, encodedDependency)
+select encodedDependency, file
