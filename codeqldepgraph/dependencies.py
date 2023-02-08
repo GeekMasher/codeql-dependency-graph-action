@@ -1,8 +1,11 @@
 from typing import *
 import os
+import logging
 from datetime import datetime
 
 from codeqldepgraph import __name__, __version__, __url__
+
+logger = logging.getLogger(__name__)
 
 
 class Dependency:
@@ -54,9 +57,15 @@ class Dependency:
 
 def parseDependencies(data: str) -> list[Dependency]:
     results = []
+    results_purl = []
 
     for line in data:
-        results.append(Dependency.parse(line))
+        dep = Dependency.parse(line)
+        if dep.getPurl() not in results_purl:
+            results.append(dep)
+            results_purl.append(dep.getPurl())
+        else:
+            logger.debug(f"Duplicate dependency: {dep.getPurl()}")
     return results
 
 

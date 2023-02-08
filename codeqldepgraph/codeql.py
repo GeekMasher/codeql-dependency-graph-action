@@ -15,10 +15,11 @@ CODEQL_LOCATIONS = [
 # Actions
 CODEQL_LOCATIONS.extend(glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/codeql"))
 # VSCode install
-CODEQL_LOCATIONS.extend(glob.glob(
-    "/home/codespace/.vscode-remote/data/User/globalStorage/github.vscode-codeql/*/codeql/codeql"
-)),
-print(CODEQL_LOCATIONS)
+CODEQL_LOCATIONS.extend(
+    glob.glob(
+        "/home/codespace/.vscode-remote/data/User/globalStorage/github.vscode-codeql/*/codeql/codeql"
+    )
+)
 
 CODEQL_DATABASE_LOCATIONS = [
     # local db
@@ -59,6 +60,7 @@ def find_codeql_databases() -> list:
 class CodeQL:
     def __init__(self, database: str, codeql_path: str = None):
         self.database = database
+        self.name = os.path.basename(database)
 
         self.codeql_path = codeql_path or find_codeql()
         self.language = self.find_language()
@@ -86,6 +88,8 @@ class CodeQL:
             full_query = query
         else:
             full_query = f"{self.pack_name}:{query}"
+
+        logger.debug(f"Running query: {full_query}")
 
         resultBqrs = os.path.join(
             self.database,
@@ -116,21 +120,37 @@ class CodeQL:
         generatedJson = os.path.join(CODEQL_TEMP, "out.json")
         output_std = os.path.join(CODEQL_TEMP, "rows.txt")
 
+        logger.debug(f"Reading rows from: {bqrsFile}")
+
+        if not os.path.exists(bqrsFile):
+            logger.error(f"Could not find bqrs file: {bqrsFile}")
+            logger.error(f"Make sure the query was ran successfully")
+            return []
+
+        cmd = [
+            self.codeql_path,
+            "bqrs",
+            "decode",
+            "--format",
+            "json",
+            "--output",
+            generatedJson,
+            bqrsFile,
+        ]
+
         with open(output_std, "wb") as std:
             subprocess.run(
-                [
-                    self.codeql_path,
-                    "bqrs",
-                    "decode",
-                    "--format",
-                    "json",
-                    "--output",
-                    generatedJson,
-                    bqrsFile,
-                ],
+                cmd,
                 stdout=std,
                 stderr=std,
             )
+
+        if not os.path.exists(generatedJson):
+            logger.error(f"Could not find generated JSON file: {generatedJson}")
+            logger.error(f"Make sure the query was ran successfully")
+            with open(output_std, "r") as std:
+                logger.error(std.read())
+            return []
 
         with open(generatedJson) as f:
             results = json.load(f)
