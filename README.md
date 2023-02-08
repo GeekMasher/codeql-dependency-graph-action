@@ -6,7 +6,7 @@ CodeQL Dependency Graph Action
 
 ```yaml
 - name: CodeQL Dependency Graph
-  uses: geekmasher/codeql-dependency-graph-action@v0.1
+  uses: geekmasher/codeql-dependency-graph-action@v0.2
 ```
 
 **Sample Action Workflow**
@@ -20,7 +20,7 @@ CodeQL Dependency Graph Action
   # autobuild or manual build
 
 - name: CodeQL Dependency Graph
-  uses: geekmasher/codeql-dependency-graph-action@v0.1
+  uses: geekmasher/codeql-dependency-graph-action@v0.2
 
 - name: Perform CodeQL Analysis
   uses: github/codeql-action/analyze@v2
